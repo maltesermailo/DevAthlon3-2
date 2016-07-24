@@ -2,6 +2,11 @@ package de.maltesermailo.servercontroller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.FileVisitor;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 import java.util.HashMap;
 
@@ -47,13 +52,13 @@ public class ServerController {
 		return token;
 	}
 
-	public boolean addServer(String name, String baseDirName, String xmx, String xms) {
+	public boolean addServer(String name, String baseDirName, String xmx, String xms, int port) {
 		File baseDir = new File(String.format("./%s/", baseDirName));
 		if(!baseDir.exists()) {
 			baseDir.mkdirs();
 		}
 		
-		Server server = new Server(name, baseDir, xmx, xms);
+		Server server = new Server(name, baseDir, xmx, xms, port);
 		
 		this.servers.put(name, server);
 		
@@ -67,7 +72,37 @@ public class ServerController {
 			server.stop();
 			
 			if(deleteFiles) {
-				server.getBaseDir().delete();
+				try {
+					Files.walkFileTree(server.getBaseDir().toPath(), new FileVisitor<Path>() {
+
+						@Override
+						public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
+								throws IOException {
+							return FileVisitResult.CONTINUE;
+						}
+
+						@Override
+						public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+							Files.deleteIfExists(file);
+							
+							return FileVisitResult.CONTINUE;
+						}
+
+						@Override
+						public FileVisitResult visitFileFailed(Path file, IOException exc) throws IOException {
+							return FileVisitResult.TERMINATE;
+						}
+
+						@Override
+						public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+							Files.deleteIfExists(dir);
+							
+							return FileVisitResult.CONTINUE;
+						}
+					});
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -94,6 +129,16 @@ public class ServerController {
 				server.stop();
 			}
 		}
+	}
+	
+	public Server getServer(String name) {
+		if(this.servers.containsKey(name)) {
+			Server server = this.servers.get(name);
+			
+			return server;
+		}
+		
+		return null;
 	}
 	
 	public void loadServers() {

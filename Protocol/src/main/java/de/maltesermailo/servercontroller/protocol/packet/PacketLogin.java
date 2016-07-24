@@ -1,6 +1,6 @@
 package de.maltesermailo.servercontroller.protocol.packet;
 
-import java.nio.ByteBuffer;
+import de.maltesermailo.servercontroller.protocol.utils.PacketUtils;
 
 import io.netty.buffer.ByteBuf;
 
@@ -11,19 +11,19 @@ public class PacketLogin extends AbstractPacket {
 	private boolean loggedOn;
 	
 	public String getToken() {
-		return token;
+		return this.token;
 	}
 	
 	public void setToken(String token) {
 		this.token = token;
 	}
 	
-	public void setLoggedOn(boolean loggedOn) {
-		this.loggedOn = loggedOn;
+	public boolean isLoggedOn() {
+		return this.loggedOn;
 	}
 	
-	public boolean isLoggedOn() {
-		return loggedOn;
+	public void setLoggedOn(boolean loggedOn) {
+		this.loggedOn = loggedOn;
 	}
 	
 	@Override
@@ -32,17 +32,15 @@ public class PacketLogin extends AbstractPacket {
 		buf.writeInt(0);
 		
 		buf.writeBoolean(this.loggedOn);
-		buf.writeBytes(this.token.getBytes());
+		
+		PacketUtils.writeString(buf, this.token);
 	}
 
 	@Override
 	public void decode(ByteBuf buf) {
 		this.loggedOn = buf.readBoolean();
 		
-		ByteBuffer buffer = ByteBuffer.allocate(buf.readableBytes());
-		buf.readBytes(buffer);
-		
-		this.token = new String(buffer.array());
+		this.token = PacketUtils.readString(buf);
 	}
 
 	@Override

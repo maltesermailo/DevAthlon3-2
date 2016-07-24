@@ -2,25 +2,31 @@ package de.maltesermailo.servercontroller.protocol.packet;
 
 import java.nio.ByteBuffer;
 
+import de.maltesermailo.servercontroller.protocol.utils.PacketUtils;
 import io.netty.buffer.ByteBuf;
 
 public class PacketStartServer extends AbstractPacket {
 
 	private String name;
 	
+	public String getName() {
+		return this.name;
+	}
+	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	@Override
 	public void encode(ByteBuf buf) {
 		buf.writeInt(1);
 		
-		buf.writeBytes(this.name.getBytes());
+		PacketUtils.writeString(buf, this.name);
 	}
 
 	@Override
 	public void decode(ByteBuf buf) {
-		ByteBuffer buffer = ByteBuffer.allocate(buf.readableBytes());
-		buf.readBytes(buffer);
-		
-		this.name = new String(buffer.array());
+		this.name = PacketUtils.readString(buf);
 	}
 
 	@Override

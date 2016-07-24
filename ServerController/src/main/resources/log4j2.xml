@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Configuration>
+<Configuration shutdownHook="enable">
     <Appenders>
 	
-	    <Console name="TerminalConsole">
+	    <Console name="TerminalConsole" target="SYSTEM_OUT">
 		  <PatternLayout pattern="[%d{HH:mm:ss}] [%level]: %msg%n" />
 		</Console>
 	
@@ -17,11 +17,8 @@
     </Appenders>
     <Loggers>
         <Root level="info">
-            <filters>
-                <MarkerFilter marker="NETWORK_PACKETS" onMatch="DENY" onMismatch="NEUTRAL" />
-            </filters>
             <AppenderRef ref="File"/>
-            <AppenderRef ref="TerminalConsole" level="info"/>
+            <AppenderRef ref="TerminalConsole"/>
         </Root>
     </Loggers>
 </Configuration>

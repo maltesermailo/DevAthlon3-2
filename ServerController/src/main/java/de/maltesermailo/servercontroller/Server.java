@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
@@ -21,17 +22,19 @@ public class Server {
 	
 	private Process theProcess;
 	
-	private String xmx;
-	private String xms;
-	
-	private List<String> args;
-	
 	private File baseDir;
 	private File pidFile;
 	
+	private String xmx;
+	private String xms;
+	
+//	private List<String> args;
+	
 	private String name;
 	
-	public Server(String name, File baseDir, String xmx, String xms) {
+	private int port;
+	
+	public Server(String name, File baseDir, String xmx, String xms, int port) {
 		this.setName(name);
 		
 		this.setBaseDir(baseDir);
@@ -39,8 +42,12 @@ public class Server {
 		this.setXmx(xmx);
 		this.setXms(xms);
 		
-		this.args = new ArrayList<>();
+		this.pidFile = new File(this.baseDir, ".pid");
+		
+//		this.args = new ArrayList<>();
 	}
+	
+	public Server() {}
 	
 	public void start(File serverFile) {
 		ProcessBuilder builder = new ProcessBuilder("java", "-jar");
@@ -50,12 +57,18 @@ public class Server {
 		
 		command.add(String.format("-Xmx%s", this.xmx));
 		command.add(String.format("-Xms%s", this.xms));
+		command.add("-p");
+		command.add(String.valueOf(this.port));
 		
-		command.add(serverFile.getPath());
+		command.add(serverFile.getAbsolutePath());
 		
-		command.addAll(this.args);
+//		command.addAll(this.args);
 		
 		try {
+			builder.redirectErrorStream(true);
+			builder.redirectInput(Redirect.INHERIT);
+			builder.redirectOutput(Redirect.INHERIT);
+			
 			this.theProcess = builder.start();
 			
 			this.pidFile.createNewFile();
@@ -65,7 +78,9 @@ public class Server {
 					String.valueOf(PlatformUtils.getpid(this.theProcess)).getBytes(),
 					StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
 		} catch (IOException e) {
-			e.printStackTrace();
+			
+			
+			this.stop();
 		}
 	}
 	
@@ -75,11 +90,14 @@ public class Server {
 			try {
 				this.theProcess.getOutputStream().write("\n".getBytes());
 				this.theProcess.getOutputStream().write("stop\n".getBytes());
-				
-				Server.shutdownService.schedule(() -> this.theProcess.destroy(), 5, TimeUnit.SECONDS);
 			} catch (IOException e) {
 				System.err.println(String.format("[ERR] Can't write to OutputStream for Server '%s'", this.name));
 			}
+			
+			if(pidFile.exists())
+				pidFile.delete();
+			
+			Server.shutdownService.schedule(() -> this.theProcess.destroy(), 5, TimeUnit.SECONDS);
 		} else if(this.pidFile != null && this.pidFile.exists()) {
 			try {
 				BufferedReader reader = new BufferedReader(new FileReader(this.pidFile));
@@ -104,16 +122,17 @@ public class Server {
 	}
 	
 	public void clear() {
-		this.args = null;
+//		this.args = null;
 		
 		this.pidFile = null;
 		
 		this.theProcess = null;
 	}
 	
-	public void setArgs(List<String> args) {
+/*	public void setArgs(List<String> args) {
 		this.args = args;
 	}
+*/
 	
 	public void setXmx(String xmx) {
 		this.xmx = xmx;
@@ -135,9 +154,10 @@ public class Server {
 		this.baseDir = baseDir;
 	}
 	
-	public List<String> getArgs() {
+/*	public List<String> getArgs() {
 		return this.args;
 	}
+*/
 	
 	public String getXmx() {
 		return this.xmx;

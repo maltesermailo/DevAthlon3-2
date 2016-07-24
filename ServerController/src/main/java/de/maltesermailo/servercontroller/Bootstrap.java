@@ -55,8 +55,12 @@ public class Bootstrap {
 			System.exit(1);
 		}
 		
-		BootstrapServer server = new BootstrapServer(logger);
-		server.start(new BootstrapChannelInitializer(sslCtx));
+		BootstrapServer server = new BootstrapServer(logger, new BootstrapChannelInitializer(sslCtx));
+		
+		Thread serverThread = new Thread(server, "Server thread");
+		serverThread.start();
+		
+		Runtime.getRuntime().addShutdownHook(new Thread(() -> controller.saveServers()));
 	}
 	
 }

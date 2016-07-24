@@ -7,6 +7,18 @@ import io.netty.channel.ChannelHandlerContext;
 
 public abstract class AbstractPacket {
 	
+	static {
+		AbstractPacket.registerPacket(0, PacketLogin.class);
+		
+		AbstractPacket.registerPacket(1, PacketStartServer.class);
+		AbstractPacket.registerPacket(2, PacketStopServer.class);
+		
+		AbstractPacket.registerPacket(3, PacketCreateServer.class);
+		AbstractPacket.registerPacket(4, PacketDeleteServer.class);
+		
+		AbstractPacket.registerPacket(5, PacketStatus.class);
+	}
+	
 	private static final HashMap<Integer, Class<? extends AbstractPacket>> REGISTRY = new HashMap<>();
 	
 	private static final HashMap<ChannelHandlerContext, PacketListener> LISTENERS = new HashMap<>();

@@ -12,5 +12,7 @@
 		<module>ServerController</module>
 		
 		<module>Protocol</module>
+		<module>BungeePlugin</module>
+		<module>SpigotPlugin</module>
 	</modules>
 </project>
