@@ -50,17 +50,19 @@ public class Server {
 	public Server() {}
 	
 	public void start(File serverFile) {
-		ProcessBuilder builder = new ProcessBuilder("java", "-jar");
+		ProcessBuilder builder = new ProcessBuilder("java");
 		builder.directory(this.baseDir);
 		
 		List<String> command = builder.command();
 		
 		command.add(String.format("-Xmx%s", this.xmx));
 		command.add(String.format("-Xms%s", this.xms));
+		
+		command.add("-jar");
+		command.add(serverFile.getAbsolutePath());
+		
 		command.add("-p");
 		command.add(String.valueOf(this.port));
-		
-		command.add(serverFile.getAbsolutePath());
 		
 //		command.addAll(this.args);
 		

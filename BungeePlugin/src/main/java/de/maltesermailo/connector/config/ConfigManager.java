@@ -69,7 +69,7 @@ public class ConfigManager {
 			int players = this.cfg.getInt(String.format("servers.%s.players", name), 0);
 			
 			if(motd != null && players > 0) {
-				motd = motd.replace('&', '§');
+				motd = motd.replace("&", "§");
 				
 				ServerPing ping = new ServerPing();
 				

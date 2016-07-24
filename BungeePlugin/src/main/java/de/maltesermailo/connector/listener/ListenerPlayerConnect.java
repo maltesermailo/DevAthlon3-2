@@ -1,6 +1,7 @@
 package de.maltesermailo.connector.listener;
 
 import de.maltesermailo.connector.BungeePlugin;
+import de.maltesermailo.servercontroller.protocol.packet.PacketStartServer;
 import net.md_5.bungee.api.Callback;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.ServerPing;
@@ -43,6 +44,11 @@ public class ListenerPlayerConnect implements Listener {
 		if(serverInfo != null) {
 			if(!this.plugin.getServerStatus(serverName)) {
 				e.getPlayer().disconnect(new TextComponent("§cBitte warte noch bis der Versuch, den Server zu starten, erfolgreich war."));
+				
+				PacketStartServer packet = new PacketStartServer();
+				packet.setName(serverName);
+				
+				this.plugin.getHandler().getChannel().writeAndFlush(packet);
 			} else {
 				e.getPlayer().connect(serverInfo);
 			}

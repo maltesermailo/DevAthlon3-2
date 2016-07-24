@@ -1,0 +1,3 @@
+name: ServerControllerSpigot
+version: 0.1
+main: de.maltesermailo.connector.SpigotPlugins

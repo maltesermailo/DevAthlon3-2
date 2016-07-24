@@ -26,4 +26,8 @@ public class ConnectionHandler extends SimpleChannelInboundHandler<AbstractPacke
 		}
 	}
 
+	
+	public Channel getChannel() {
+		return ch;
+	}
 }
